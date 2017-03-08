@@ -221,6 +221,7 @@ $.fn.extend({
 
             }
             ctx.closePath();
+            paintLine(canvas,opts.lineWidth,opts.lineColor);
         }
         function calYValue(y) {
             return Math.round(padTop + bodyHeight * (yValue - (y - opts.yMin)) / yValue);
@@ -239,7 +240,63 @@ $.fn.extend({
                 height: Math.round(m.width * ratio)
             }
         }
+        function paintLine(canvas,lineWidth, strokeStyle) {
+            ctx.beginPath();
+            //绘制曲线
+            var t;
+            canvas.addEventListener("click",function () {
+                var audio =document.getElementById("wav");
+                audio.play();
+                if (moving){
+                    audio.pause();
+                    clearTimeout(t);
+                    moving=false
+                }else {
+                    audio.play();
+                    moving=true;
+                    drawl();
+                }
 
+
+            });
+            ctx.lineWidth = calLineWidth(lineWidth);
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineCap="round";
+            ctx.shadowBlur=1;
+            ctx.shadowOffsetX=2;
+            ctx.shadowColor="#000022";//默认。向线条的每个末端添加平直的边缘。
+            ctx.lineJoin="round";
+            var isStart = false;
+            var i=0;
+            var moving=false;
+            drawl();
+            function drawl() {
+                moving=true;
+                if(i<opts.data.length){
+                    var point = opts.data[i].y;
+                    //计算心跳值的绝对值>20
+                    var pointDiffer = 0;
+                    if (i > 0) {
+                        pointDiffer = Math.abs(opts.data[i - 1].y - point);
+                    }
+                    if (point > 40 && point <= 220) {
+                        if (isStart && pointDiffer < 20) {
+                            ctx.lineTo(calXValue(i), calYValue(point));
+                        }
+                        ctx.moveTo(calXValue(i), calYValue(point));
+                        isStart = true
+                    }
+                    else {
+                        isStart = false
+                    }
+                }
+                ctx.stroke();
+                ctx.closePath();
+                i++;
+                t=setTimeout(drawl,500);
+            }
+        }
     }
+
 
 });

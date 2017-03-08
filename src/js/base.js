@@ -2,6 +2,9 @@
  * 主要js
  */
 ;
+window.requestAnimationFrame = window.requestAnimationFrame||
+    window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
+    window.msRequestAnimationFrame;
 window.mini || (function ($) {
     'use strict';
     var doc = $(document),
@@ -280,14 +283,13 @@ window.mini || (function ($) {
                     ctx.beginPath();
                     //绘制曲线
                     var t;
+                    var audio =document.getElementById("wav");
                     canvas.addEventListener("click",function () {
-                        var img=document.getElementById("start");
-                        var audio =document.getElementById("wav");
                         audio.play();
                         if (moving){
-                            var width =Math.min(window.screen.width,canvas.width);
                             audio.pause();
-                            clearTimeout(t);
+                            //clearTimeout(t);
+                            cancelAnimationFrame(t);
                             moving=false
                         }else {
                             audio.play();
@@ -327,12 +329,16 @@ window.mini || (function ($) {
                             else {
                                 isStart = false
                             }
+                        }else {
+                            audio.pause();
                         }
                         ctx.stroke();
-                        ctx.closePath();
                         i++;
-                        t=setTimeout(drawl,500);
+                        // t=setTimeout(drawl,500);
+                      var t= requestAnimationFrame(drawl);
                     }
+                    ctx.closePath();
+
                 }
             }
         };
